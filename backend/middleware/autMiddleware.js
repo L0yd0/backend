@@ -17,7 +17,7 @@ const protect = asyncHandler(async (req, res, next) => {
             //para que cualquier endpoint que use prote tenga acceso a esos datos
             req.user = await User.findById(decoded.id_usuario)
 
-            //contunuamos con un next 
+            //continuamos con un next 
             next()
 
 
