@@ -3,35 +3,36 @@ const asyncHandler = require('express-async-handler')
 const User = require('../models/usersModels')
 
 const protect = asyncHandler(async (req, res, next) => {
-    let token 
+  let token
 
-    if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
-        try{
-            //obtenemos el token 
-            token = req.headers.authorization.split(' ')[1]
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    try {
+      // obtenemos el token
+      token = req.headers.authorization.split(' ')[1]
 
-            //verificamos el token para que sea valido (firma, caducidad)
-            const decoded = jwt.verify(token, processenv.JWT_SECRET)
+      // verificamos el token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET)
 
-            //datos del usuario del token a traves del id usuario que esta en el paylod
-            //para que cualquier endpoint que use prote tenga acceso a esos datos
-            req.user = await User.findById(decoded.id_usuario)
+      // buscamos el usuario con el ID del payload
+      req.user = await User.findById(decoded.id).select('-password')
 
-            //continuamos con un next 
-            next()
-
-
-        }catch(error){
-            console.log(error)
-            res.status(401)
-            throw new Error('Acceso no autorizado')
-        }
-    }
-
-    if(!token){
+      if (!req.user) {
         res.status(401)
-        throw new Error('acceso no autorizado, no se proporciono el token')
+        throw new Error('Usuario no encontrado')
+      }
+
+      next()
+    } catch (error) {
+      console.error('Error al verificar token:', error.message)
+      res.status(401)
+      throw new Error('Acceso no autorizado')
     }
+  }
+
+  if (!token) {
+    res.status(401)
+    throw new Error('Acceso no autorizado, no se proporcionó token')
+  }
 })
 
 module.exports = protect
