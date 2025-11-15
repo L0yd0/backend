@@ -62,8 +62,8 @@ const misDatos = asyncHandler(async(req, res)=>{
 
 //funcion para generar el token
 
-const generarToken = (id_usuario) => {
-    return jwt.sign({id_usuario}, process.env.JWT_SECRET, {
+const generarToken = (id) => {
+    return jwt.sign({id}, process.env.JWT_SECRET, {
         expiresIn: '30d'
     })
 }
